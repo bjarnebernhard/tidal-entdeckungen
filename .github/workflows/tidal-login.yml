@@ -1,0 +1,23 @@
+name: Tidal-Login
+
+# Einmalig manuell starten: Im Log erscheint ein Link (link.tidal.com/…).
+# Öffnen, bei Tidal bestätigen – innerhalb von 5 Minuten.
+on:
+  workflow_dispatch:
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install tidalapi
+      - run: python -u login.py
+        env:
+          TOKEN_FILE: .tidal/token.json
+      - uses: actions/cache/save@v4
+        with:
+          path: .tidal
+          key: tidal-token-${{ github.run_id }}

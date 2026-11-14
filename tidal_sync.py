@@ -10,6 +10,7 @@ Optional:
 
 import datetime
 import difflib
+import json
 import os
 import re
 import sys
@@ -23,8 +24,12 @@ SONG_FILE = os.environ.get("SONG_FILE", "songs/latest.txt")
 
 def login() -> tidalapi.Session:
     refresh_token = os.environ.get("TIDAL_REFRESH_TOKEN")
+    token_file = os.environ.get("TOKEN_FILE")
+    if not refresh_token and token_file and os.path.exists(token_file):
+        with open(token_file) as f:
+            refresh_token = json.load(f).get("refresh_token")
     if not refresh_token:
-        sys.exit("TIDAL_REFRESH_TOKEN fehlt – erst login.py ausführen.")
+        sys.exit("Kein Tidal-Login gefunden – erst die Action „Tidal-Login“ ausführen.")
     session = tidalapi.Session()
     if not session.token_refresh(refresh_token):
         sys.exit("Refresh-Token abgelaufen – login.py erneut ausführen.")

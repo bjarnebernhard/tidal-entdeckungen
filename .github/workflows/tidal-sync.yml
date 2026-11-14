@@ -15,8 +15,21 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install tidalapi
+      # Tidal-Login aus dem Cache holen (von der Action „Tidal-Login“ angelegt)
+      - uses: actions/cache/restore@v4
+        with:
+          path: .tidal
+          key: tidal-token-none
+          restore-keys: tidal-token-
       - run: python tidal_sync.py
         env:
           TIDAL_REFRESH_TOKEN: ${{ secrets.TIDAL_REFRESH_TOKEN }}
+          TOKEN_FILE: .tidal/token.json
           PLAYLIST_NAME: "Tägliche Entdeckungen"
           MODE: "replace"
+      # Login neu speichern, damit der Cache nicht nach 7 Tagen verfällt
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('.tidal/token.json') != ''
+        with:
+          path: .tidal
+          key: tidal-token-${{ github.run_id }}

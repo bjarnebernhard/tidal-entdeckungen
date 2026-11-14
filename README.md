@@ -4,13 +4,13 @@ Claude schreibt jede Nacht neue Song-Empfehlungen nach `songs/latest.txt`.
 Ein Push auf diese Datei startet die GitHub Action, die die Songs bei Tidal sucht
 und in die Playlist **Tägliche Entdeckungen** schreibt (jeden Tag neu gefüllt).
 
-## Einmalige Einrichtung
+## Einmalige Einrichtung (geht komplett am Handy)
 
-1. Lokal (PC oder Termux): `pip install tidalapi` und `python login.py`.
-   Den angezeigten Link öffnen, bei Tidal bestätigen, den ausgegebenen Token kopieren.
-2. Auf GitHub: Repo → Settings → Secrets and variables → Actions → New repository secret
-   - Name: `TIDAL_REFRESH_TOKEN`, Wert: der kopierte Token.
-3. Testen: Actions → „Tidal-Playlist aktualisieren“ → Run workflow.
+1. Repo → Actions → „Tidal-Login“ → Run workflow.
+2. Den laufenden Job öffnen, im Schritt `python -u login.py` erscheint ein Link
+   `link.tidal.com/…` – öffnen und bei Tidal bestätigen (innerhalb von 5 Minuten).
+3. Fertig: Der Login liegt im Actions-Cache und wird bei jedem Lauf erneuert.
+   Läuft 7 Tage lang nichts, verfällt er – dann Schritt 1–2 wiederholen.
 
 ## Einstellungen (in `.github/workflows/tidal-sync.yml`)
 
