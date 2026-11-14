@@ -1,0 +1,22 @@
+name: Tidal-Playlist aktualisieren
+
+on:
+  push:
+    paths:
+      - "songs/latest.txt"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install tidalapi
+      - run: python tidal_sync.py
+        env:
+          TIDAL_REFRESH_TOKEN: ${{ secrets.TIDAL_REFRESH_TOKEN }}
+          PLAYLIST_NAME: "Tägliche Entdeckungen"
+          MODE: "replace"
