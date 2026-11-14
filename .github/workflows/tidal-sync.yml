@@ -6,6 +6,9 @@ on:
       - "songs/latest.txt"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -27,6 +30,20 @@ jobs:
           TOKEN_FILE: .tidal/token.json
           PLAYLIST_NAME: "Tägliche Entdeckungen"
           MODE: "replace"
+      # Playlist „Rotation“ als Geschmacksvorlage nach songs/rotation.txt exportieren
+      - run: python tidal_export.py
+        if: always()
+        continue-on-error: true
+        env:
+          TIDAL_REFRESH_TOKEN: ${{ secrets.TIDAL_REFRESH_TOKEN }}
+          TOKEN_FILE: .tidal/token.json
+      - name: Export committen
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add songs/rotation.txt 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Rotation-Export" && git push)
       # Login neu speichern, damit der Cache nicht nach 7 Tagen verfällt
       - uses: actions/cache/save@v4
         if: always() && hashFiles('.tidal/token.json') != ''
