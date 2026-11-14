@@ -43,7 +43,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
           git add songs/rotation.txt 2>/dev/null || true
-          git diff --cached --quiet || (git commit -m "Rotation-Export" && git push)
+          git diff --cached --quiet || (git commit -m "Rotation-Export" && git pull --rebase && git push)
       # Login neu speichern, damit der Cache nicht nach 7 Tagen verfällt
       - uses: actions/cache/save@v4
         if: always() && hashFiles('.tidal/token.json') != ''
