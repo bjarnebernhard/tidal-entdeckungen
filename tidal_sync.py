@@ -14,7 +14,9 @@ import json
 import os
 import re
 import sys
+import time
 
+import requests
 import tidalapi
 
 PLAYLIST_NAME = os.environ.get("PLAYLIST_NAME", "Tägliche Entdeckungen")
@@ -105,8 +107,19 @@ def main() -> None:
         playlist = session.user.create_playlist(f"Entdeckungen {today}", description)
     else:
         playlist = get_playlist(session, PLAYLIST_NAME, description)
-        if playlist.num_tracks:
-            playlist.clear()
+        # Frischer Stand (ETag), sonst antwortet Tidal beim Leeren mit 412
+        for attempt in range(4):
+            playlist = session.playlist(playlist.id)
+            if not playlist.num_tracks:
+                break
+            try:
+                playlist.clear()
+                break
+            except requests.exceptions.HTTPError as e:
+                if e.response is None or e.response.status_code != 412 or attempt == 3:
+                    raise
+                print(f"412 beim Leeren, neuer Versuch ({attempt + 1}/3)")
+                time.sleep(2)
         playlist = session.playlist(playlist.id)  # frischer Stand (ETag)
         playlist.edit(description=description)
         playlist = session.playlist(playlist.id)
